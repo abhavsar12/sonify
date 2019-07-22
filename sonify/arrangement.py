@@ -161,7 +161,7 @@ class Track:
             if not isinstance(key, str):
                 raise TypeError("Key type error, string expected.")
 
-            if Track.note_to_num(key) is None:
+            if Track._note_to_num(key) is None:
                 raise ValueError("Key is invalid.")
 
             return True
@@ -199,6 +199,15 @@ class Track:
 
     @staticmethod
     def _interval_switcher(interval_type):
+        """Switch between different interval type based on string input.
+
+        Args:
+            interval_type (str): interval type as a string
+
+        Return:
+            list: List representation of interval steps
+
+        """
         if interval_type == 'triad':
             return Track.TRIAD
         elif interval_type == 'fourth':
@@ -215,7 +224,7 @@ class Track:
     def _create_voices(self):
         """Assign list of notes as numbers to track."""
         voices = []
-        voices.append(self.note_to_num(self._key))
+        voices.append(self._note_to_num(self._key))
         for i in range(1, self._num_voices):
             voice = voices[0]
             j = i % len(self._interval_type)
@@ -224,9 +233,8 @@ class Track:
             voices.append(voice)
         self._voices = voices
 
-    # make normal methods, add list conversions and octave range conversions
     @staticmethod
-    def note_to_num(note):
+    def _note_to_num(note):
         """Convert note to number.
 
         Args:
@@ -242,7 +250,7 @@ class Track:
                 return key
         return None
 
-    def num_to_note(self):
+    def _num_to_note(self):
         """Convert voices to notes with respect to octave.
 
         Returns:
@@ -255,7 +263,7 @@ class Track:
             notes.append(Track.NOTES[i % 12] + str(octave))
         return notes
 
-    def num_to_freq(self):
+    def _num_to_freq(self):
         """Convert voices to frequencies in Hz.
 
         Returns:
@@ -270,50 +278,85 @@ class Track:
 
     @property
     def num_voices(self):
+        """Voice number property."""
         return self._num_voices
 
     @num_voices.setter
     def num_voices(self, new_num_voices):
+        """Set new number of voices after validation.
+
+        Args:
+            new_num_voices (int): new number of voices.
+
+        """
         if self._validate_num_voices_and_octave(new_num_voices, self._octave, self._interval_type):
             self._num_voices = new_num_voices
             self._create_voices()
 
     @property
     def key(self):
+        """Key property."""
         return self._key
 
     @key.setter
     def key(self, new_key):
+        """Set new key after validation.
+
+        Args:
+            new_key (str): new key.
+
+        """
         if self._validate_key(new_key):
             self._key = new_key
             self._create_voices()
 
     @property
     def mode(self):
+        """Mode property."""
         return self._mode
 
     @mode.setter
     def mode(self, new_mode):
+        """Set new mode after validation.
+
+        Args:
+            new_mode (str): new mode.
+
+        """
         if self._validate_mode(new_mode):
             self._mode = new_mode
             self._create_voices()
 
     @property
     def octave(self):
+        """Octave property."""
         return self._octave
 
     @octave.setter
     def octave(self, new_octave):
+        """Set new octave after validation.
+
+        Args:
+            new_octave (int): new octave.
+
+        """
         if self._validate_num_voices_and_octave(self._num_voices, new_octave, self._interval_type):
             self._octave = new_octave
             self._create_voices()
 
     @property
     def interval_type(self):
+        """Interval type property."""
         return self._interval_type
 
     @interval_type.setter
     def interval_type(self, new_interval_type):
+        """Set new interval type after validation.
+
+        Args:
+            new_interval_type (str): new interval type.
+
+        """
         if self._validate_interval_type(new_interval_type):
             new_interval_type = self._interval_switcher(new_interval_type)
             if self._validate_num_voices_and_octave(self._num_voices, self._octave, new_interval_type):
@@ -321,5 +364,11 @@ class Track:
                 self._create_voices()
 
     @property
-    def voices(self):
-        return self._voices
+    def voices(self, freq=False):
+        """Voices property."""
+        return self._num_to_note()
+
+    @property
+    def voice_freqs(self):
+        """Voices as frequencies property."""
+        return self._num_to_freq()
